@@ -1,0 +1,5 @@
+read_verilog -sv design.sv
+hierarchy -top ALU
+proc
+opt
+show -format svg
