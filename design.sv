@@ -23,12 +23,10 @@ module ALU #(parameter WIDTH=64)(
   localparam PASS_B=5'b01111;
   localparam MUL=5'b10000;
   localparam DIV=5'b10001;
-  
   logic [(2*WIDTH)-1:0] shift_A;
   logic [WIDTH:0] temp_remainder;
   logic [WIDTH-1:0] shift_B;
   integer i;
-  
   always_comb begin
     result   = '0;
     product  = '0;
@@ -37,6 +35,7 @@ module ALU #(parameter WIDTH=64)(
     carry    = 1'b0;
     borrow   = 1'b0;
     div_zero = 1'b0;
+    i              = 0;
     shift_A         = '0;
     shift_B         = '0;
     temp_remainder  = '0;
@@ -114,11 +113,8 @@ module ALU #(parameter WIDTH=64)(
           //remainder = A % B;
           temp_remainder = '0;
           quotient = '0;
-
           for (i = WIDTH-1; i >= 0; i = i-1) begin
-
               temp_remainder = (temp_remainder << 1) | A[i];
-
               if (temp_remainder >= B) begin
                   temp_remainder = temp_remainder - B;
                   quotient[i] = 1'b1;
@@ -127,7 +123,6 @@ module ALU #(parameter WIDTH=64)(
                   quotient[i] = 1'b0;
               end
           end
-
           remainder = temp_remainder[WIDTH-1:0];
         end
       end
