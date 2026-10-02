@@ -1,7 +1,0 @@
-read_verilog -sv design.sv
-hierarchy -top ALU
-proc
-opt
-stat
-show -format svg -prefix alu_schematic
-write_verilog synth.v
