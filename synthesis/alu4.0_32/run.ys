@@ -1,0 +1,6 @@
+read_verilog -sv design.sv
+hierarchy -top ALU
+proc
+opt
+stat
+write_verilog synth.v
