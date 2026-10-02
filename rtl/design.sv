@@ -24,10 +24,7 @@ module ALU #(
   output logic valid
 );
 
-  // ============================================================
   // OPCODES
-  // ============================================================
-
   localparam [4:0] ADD  = 5'd0;
   localparam [4:0] SUB  = 5'd1;
   localparam [4:0] AND  = 5'd2;
@@ -50,10 +47,8 @@ module ALU #(
   localparam integer PROD_WIDTH = 2 * WIDTH;
   localparam integer DIV_WIDTH  = WIDTH + 4;
 
-  // ============================================================
   // OPCODE PIPELINE
-  // ============================================================
-
+  
   logic [4:0] opcode_s1;
   logic [4:0] opcode_s2;
   logic [4:0] opcode_s3;
