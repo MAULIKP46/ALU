@@ -10,31 +10,63 @@ After completing the 32-bit implementation, the same ALU 4.0 architecture was sc
 
 ---
 
-## Project at a Glance
+## Table of Contents
 
-| Item                            | Details                   |
-| ------------------------------- | ------------------------- |
-| Project                         | Parameterized ASIC ALU    |
-| Final successful implementation | **ALU 4.0 — 32-bit**      |
-| Scaling experiment              | ALU 4.0 — 64-bit          |
-| Operations                      | 18                        |
-| Pipeline                        | 8-stage                   |
-| Multiplier                      | Custom radix-16 shift/add |
-| Divider                         | Custom radix-16 restoring |
-| HDL                             | SystemVerilog             |
-| RTL simulation                  | Icarus Verilog            |
-| Waveform analysis               | GTKWave                   |
-| Early experimentation           | EDA Playground            |
-| Development environment         | Windows + WSL             |
-| Linux environment               | Ubuntu                    |
-| Containerization                | Docker                    |
-| Synthesis                       | Yosys                     |
-| Technology mapping              | ABC                       |
-| ASIC flow                       | LibreLane                 |
-| Physical design                 | OpenROAD                  |
-| PDK                             | SKY130A                   |
-| Standard-cell library           | `sky130_fd_sc_hd`         |
-| Final physical output           | GDSII                     |
+* [Project at a Glance](#project-at-a-glance)
+* [1. Project Objective](#1-project-objective)
+* [2. Development Journey](#2-development-journey)
+* [3. ALU 1.0 — Establishing the Baseline](#3-alu-10--establishing-the-baseline)
+* [4. ALU 2.0 — Exploring Simpler RTL](#4-alu-20--exploring-simpler-rtl)
+* [5. ALU 3.0 — Moving Toward Custom Hardware](#5-alu-30--moving-toward-custom-hardware)
+* [6. ALU 3.0 — 32-bit Physical Implementation](#6-alu-30--32-bit-physical-implementation)
+* [7. ALU 4.0 — Major Architectural Improvement](#7-alu-40--major-architectural-improvement)
+* [8. ALU 4.0 — Supported Operations](#8-alu-40--supported-operations)
+* [9. RTL Verification](#9-rtl-verification)
+* [10. ALU 4.0 — Synthesis](#10-alu-40--synthesis)
+* [11. Technology Mapping](#11-technology-mapping)
+* [12. ALU 4.0 — 32-bit Final ASIC Implementation](#12-alu-40--32-bit-final-asic-implementation)
+* [13. Final 32-bit Signoff Results](#13-final-32-bit-signoff-results)
+* [14. Final Physical Artifacts](#14-final-physical-artifacts)
+* [15. ALU 4.0 — 64-bit Scaling Experiment](#15-alu-40--64-bit-scaling-experiment)
+* [16. 64-bit Physical-Design Experiment](#16-64-bit-physical-design-experiment)
+* [17. Why the 64-bit Experiment Matters](#17-why-the-64-bit-experiment-matters)
+* [18. What Improved Across the Generations](#18-what-improved-across-the-generations)
+* [19. Development Environment](#19-development-environment)
+* [20. Complete Development Stack](#20-complete-development-stack)
+* [21. ASIC Toolchain](#21-asic-toolchain)
+* [22. Repository Structure](#22-repository-structure)
+* [23. Documentation Guide](#23-documentation-guide)
+* [24. Key Results](#24-key-results)
+* [25. Engineering Takeaways](#25-engineering-takeaways)
+* [26. Final Project Outcome](#26-final-project-outcome)
+
+---
+
+# Project at a Glance
+
+| Item                                | Details                   |
+| ----------------------------------- | ------------------------- |
+| **Project**                         | Parameterized ASIC ALU    |
+| **Final successful implementation** | **ALU 4.0 — 32-bit**      |
+| **Scaling experiment**              | ALU 4.0 — 64-bit          |
+| **Operations**                      | 18                        |
+| **Pipeline**                        | 8-stage                   |
+| **Multiplier**                      | Custom radix-16 shift/add |
+| **Divider**                         | Custom radix-16 restoring |
+| **HDL**                             | SystemVerilog             |
+| **RTL simulation**                  | Icarus Verilog            |
+| **Waveform analysis**               | GTKWave                   |
+| **Early experimentation**           | EDA Playground            |
+| **Development environment**         | Windows + WSL             |
+| **Linux environment**               | Ubuntu                    |
+| **Containerization**                | Docker                    |
+| **Synthesis**                       | Yosys                     |
+| **Technology mapping**              | ABC                       |
+| **ASIC flow**                       | LibreLane                 |
+| **Physical design**                 | OpenROAD                  |
+| **PDK**                             | SKY130A                   |
+| **Standard-cell library**           | `sky130_fd_sc_hd`         |
+| **Final physical output**           | GDSII                     |
 
 ---
 
@@ -132,7 +164,14 @@ The first implementation demonstrated an important ASIC-design principle:
 
 > **A functionally correct RTL design can still be extremely difficult to implement physically.**
 
-The historical implementation produced very large hardware and poor timing characteristics, establishing a baseline for subsequent architectural improvements.
+The historical implementation produced very large hardware and poor timing characteristics.
+
+The approximate historical result was:
+
+```text
+WNS ≈ -192.54 ns
+~159K instances
+```
 
 ### Lessons from ALU 1.0
 
@@ -147,7 +186,7 @@ The historical implementation produced very large hardware and poor timing chara
 
 ALU 2.0 explored a simpler RTL description using built-in arithmetic operators.
 
-Examples included operations represented directly using constructs such as:
+Examples included:
 
 ```text
 A * B
@@ -161,7 +200,13 @@ However, the physical-design results demonstrated another important lesson:
 
 > **Simpler RTL does not automatically mean better physical implementation.**
 
-The experiment showed that generic arithmetic operators can hide significant hardware complexity and that the physical implementation depends heavily on the underlying architecture.
+The historical implementation produced approximately:
+
+```text
+WNS ≈ -367.79 ns
+```
+
+The experiment also encountered antenna-related issues.
 
 ### Main lesson
 
@@ -237,7 +282,7 @@ The multiplier processes:
 4 multiplier bits per stage
 ```
 
-Rather than relying on a generic:
+Instead of relying on a generic:
 
 ```text
 A * B
@@ -345,9 +390,11 @@ PASSED      : 328
 FAILED      : 0
 ```
 
+### Verification Result
+
 **328/328 tests passed successfully.**
 
-The verification covered arithmetic, logical, shift, comparison, arithmetic, and status-flag behavior across the 64-bit implementation.
+The verification covered arithmetic, logical, shift, comparison, multiplication, division, and status-flag behavior across the 64-bit implementation.
 
 Detailed verification information is available in:
 
@@ -384,7 +431,7 @@ $div = 0
 $mod = 0
 ```
 
-This confirmed that the custom multiplier and divider were not represented as generic inferred multiplication, division, or modulo cells at this synthesis stage.
+This confirms that the custom multiplier and divider were not represented as generic inferred multiplication, division, or modulo cells at this synthesis stage.
 
 ---
 
@@ -394,7 +441,7 @@ After RTL synthesis, the design was technology-mapped using **ABC**.
 
 The 64-bit design was converted into a large gate-level representation.
 
-### ABC input
+### ABC Input
 
 ```text
 118,131 gates
@@ -403,7 +450,7 @@ The 64-bit design was converted into a large gate-level representation.
 1,289 outputs
 ```
 
-### Final mapped netlist
+### Final Mapped Netlist
 
 ```text
 89,775 cells
@@ -429,7 +476,7 @@ The synthesis and technology-mapping stages therefore completed successfully for
 
 ---
 
-# 12. ALU 4.0 — Final 32-bit ASIC Implementation
+# 12. ALU 4.0 — 32-bit Final ASIC Implementation
 
 After developing and verifying ALU 4.0, the architecture was implemented at **32 bits** for the final physical-design target.
 
@@ -465,16 +512,17 @@ GDSII
 
 ---
 
-# 13. Final 32-bit Physical-Design Results
+# 13. Final 32-bit Signoff Results
 
 The final 32-bit implementation successfully generated the physical-design artifacts.
 
-### Physical implementation
+### Physical Implementation
 
 * Floorplanning completed
 * Placement completed
 * Clock Tree Synthesis completed
-* Routing completed
+* Global routing completed
+* Detailed routing completed
 * Antenna verification passed
 * DRC passed
 * LVS passed
@@ -494,11 +542,7 @@ The final 32-bit implementation successfully generated the physical-design artif
 | Placement target density  | 35%               |
 | Global-routing adjustment | 0.2               |
 
----
-
-# 14. Final Signoff Results
-
-The final ALU 4.0 32-bit implementation achieved:
+### Signoff
 
 | Check            | Result   |
 | ---------------- | -------- |
@@ -507,9 +551,21 @@ The final ALU 4.0 32-bit implementation achieved:
 | Antenna          | **PASS** |
 | GDSII generation | **PASS** |
 
+### DRC
+
+```text
+DRC violations = 0
+```
+
+### LVS
+
+```text
+Circuits match uniquely
+```
+
 ### Timing
 
-From the final max timing report:
+From the final maximum timing report:
 
 ```text
 Clock period : 30 ns
@@ -522,11 +578,21 @@ Therefore:
 
 **Setup slack = +4.895714 ns at a 30 ns clock period.**
 
-The detailed timing reports also contain electrical warnings, including slew and fanout violations. These are retained in the repository for transparency and further analysis.
+The detailed timing reports also contain electrical warnings, including:
+
+```text
+Worst max slew      : 0.879432 ns
+Slew limit          : 0.75 ns
+Slew violations     : 131
+Fanout violations   : 17
+Clock net fanout    : 1499
+```
+
+These warnings are retained in the repository reports for transparency and further analysis.
 
 ---
 
-# 15. Final Physical Artifacts
+# 14. Final Physical Artifacts
 
 The final 32-bit physical-design directory contains the key implementation artifacts:
 
@@ -548,19 +614,22 @@ physical_design/
         └── metrics.json
 ```
 
-The final GDSII is distributed separately through the GitHub Release:
+The large GDSII file is distributed separately through the GitHub Release rather than being kept in the normal source tree.
+
+### Final GDSII Release
 
 ```text
-Release: v4.0-32bit
+Release : v4.0-32bit
+Title   : ALU 4.0 — 32-bit SKY130 ASIC
 Artifact: ALU.gds
-Size: approximately 79.6 MB
+Size    : approximately 79.6 MB
 ```
 
-This keeps the large GDSII artifact separate from the normal source tree while still making the final physical output available.
+The release contains the final generated GDSII corresponding to the successful 32-bit physical implementation.
 
 ---
 
-# 16. ALU 4.0 — 64-bit Scaling Experiment
+# 15. ALU 4.0 — 64-bit Scaling Experiment
 
 After successfully completing the 32-bit physical implementation, ALU 4.0 was scaled to 64 bits.
 
@@ -578,7 +647,7 @@ However, the physical-design experiment exposed significantly greater implementa
 
 ---
 
-# 17. 64-bit Physical-Design Experiment
+# 16. 64-bit Physical-Design Experiment
 
 The 64-bit design was submitted to the same ASIC physical-design flow.
 
@@ -590,8 +659,9 @@ The larger implementation introduced greater:
 * Capacitance
 * Timing complexity
 * Physical congestion
+* Multi-corner analysis complexity
 
-The physical-design experiment encountered violations during post-route timing/signoff analysis, including issues associated with:
+During post-route timing/signoff, the experiment encountered violations associated with:
 
 * Setup timing
 * Slew
@@ -602,11 +672,13 @@ The final multi-corner post-PnR timing/signoff process did not complete successf
 
 Therefore, the 64-bit implementation is **not presented as a completed ASIC/GDSII result**.
 
-It is documented as a scaling experiment.
+It is documented as a **scaling experiment**.
+
+This distinction is intentional: the project reports the successful 32-bit physical implementation separately from the incomplete 64-bit physical-design experiment.
 
 ---
 
-# 18. Why the 64-bit Experiment Matters
+# 17. Why the 64-bit Experiment Matters
 
 The 64-bit experiment demonstrated an important ASIC-design principle:
 
@@ -638,15 +710,15 @@ More difficult timing closure
 More difficult signoff
 ```
 
-This is why the 32-bit implementation remains the final successful ASIC output while the 64-bit implementation is retained as an engineering experiment.
+This is why the 32-bit implementation remains the **final successful ASIC output**, while the 64-bit implementation is retained as an engineering experiment.
 
 ---
 
-# 19. What Improved Across the Generations?
+# 18. What Improved Across the Generations?
 
 | Version              | Main Focus                              | Engineering Outcome                                                                  |
 | -------------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
-| **ALU 1.0**          | Initial architecture                    | Established the baseline and exposed physical-timing limitations                     |
+| **ALU 1.0**          | Initial architecture                    | Established the baseline and exposed severe physical-timing limitations              |
 | **ALU 2.0**          | Simplified RTL / generic arithmetic     | Demonstrated that simpler RTL does not automatically produce better physical results |
 | **ALU 3.0**          | Custom arithmetic                       | Provided greater control over synthesized hardware                                   |
 | **ALU 3.0 — 32-bit** | Physical implementation                 | Established practical physical-design experience                                     |
@@ -654,13 +726,162 @@ This is why the 32-bit implementation remains the final successful ASIC output w
 | **ALU 4.0 — 32-bit** | Final ASIC implementation               | Successfully completed physical implementation and generated GDSII                   |
 | **ALU 4.0 — 64-bit** | Architecture scaling                    | RTL and synthesis successful; physical closure became significantly harder           |
 
-The project was therefore developed through **iteration, measurement, analysis, and architectural improvement**.
+The project was therefore developed through:
+
+```text
+Iteration
+   ↓
+Measurement
+   ↓
+Analysis
+   ↓
+Architectural improvement
+   ↓
+Re-implementation
+```
+
+rather than attempting to design the final architecture immediately.
 
 ---
 
-# 20. Repository Structure
+# 19. Development Environment
 
-The repository is organized according to the different stages of the project:
+The project was developed using Windows together with a Linux-based ASIC development environment.
+
+## Windows
+
+The main development machine used Windows, with Linux-based ASIC tools accessed through WSL.
+
+## WSL — Windows Subsystem for Linux
+
+WSL provided the Linux environment required for the open-source ASIC toolchain.
+
+## Ubuntu
+
+Ubuntu running under WSL was used for:
+
+* RTL simulation
+* Yosys synthesis
+* ABC technology mapping
+* LibreLane execution
+* OpenROAD physical design
+* Report analysis
+* Shell scripting
+* File management
+
+## Docker
+
+Docker was used as part of the LibreLane-based ASIC environment to provide a controlled tool environment and manage dependencies.
+
+## EDA Playground
+
+EDA Playground was used during earlier stages for:
+
+* RTL experimentation
+* Verilog/SystemVerilog learning
+* Quick simulations
+* Debugging smaller modules
+
+The project therefore progressed from rapid RTL experimentation to a complete local ASIC-development environment.
+
+---
+
+# 20. Complete Development Stack
+
+```text
+                         WINDOWS
+                            │
+                            ▼
+                      WSL / UBUNTU
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+              ▼                           ▼
+       EDA PLAYGROUND              LOCAL RTL FLOW
+       Early experiments                  │
+                                         ▼
+                                  Icarus Verilog
+                                         │
+                                         ▼
+                                      GTKWave
+                                         │
+                                         ▼
+                                       Yosys
+                                         │
+                                         ▼
+                                        ABC
+                                         │
+                                         ▼
+                                       Docker
+                                         │
+                                         ▼
+                                     LibreLane
+                                         │
+                                         ▼
+                                     OpenROAD
+                                         │
+                                         ▼
+                                      SKY130A
+                                         │
+                                         ▼
+                                       GDSII
+```
+
+---
+
+# 21. ASIC Toolchain
+
+### RTL Design
+
+* SystemVerilog
+* EDA Playground
+
+### Simulation
+
+* Icarus Verilog
+* GTKWave
+
+### Development Environment
+
+* Windows
+* WSL
+* Ubuntu
+* Bash
+* Docker
+
+### Synthesis
+
+* Yosys
+
+### Technology Mapping
+
+* ABC
+
+### ASIC Flow
+
+* LibreLane
+
+### Physical Design
+
+* OpenROAD
+
+### Process Design Kit
+
+* SKY130A
+
+### Standard-Cell Library
+
+* `sky130_fd_sc_hd`
+
+### Final Output
+
+* GDSII
+
+---
+
+# 22. Repository Structure
+
+The repository is organized according to the actual development history and ASIC flow.
 
 ```text
 ALU/
@@ -713,22 +934,23 @@ ALU/
 └── alu.compressed.zip
 ```
 
-The major project areas are therefore:
+### Directory Overview
 
-| Directory          | Purpose                               |
-| ------------------ | ------------------------------------- |
-| `architecture/`    | ALU architecture documentation        |
-| `history/`         | Earlier ALU generations               |
-| `rtl/`             | Current ALU 4.0 RTL and testbench     |
-| `verification/`    | Functional verification results       |
-| `synthesis/`       | Yosys synthesis and mapping artifacts |
-| `docs/`            | ASIC flow and result documentation    |
-| `physical_design/` | Final 32-bit ASIC implementation      |
-| `README.md`        | Project overview                      |
+| Directory            | Purpose                               |
+| -------------------- | ------------------------------------- |
+| `architecture/`      | ALU architecture documentation        |
+| `history/`           | Earlier ALU generations               |
+| `rtl/`               | Current ALU 4.0 RTL and testbench     |
+| `verification/`      | Functional verification results       |
+| `synthesis/`         | Yosys synthesis and mapping artifacts |
+| `docs/`              | ASIC flow and result documentation    |
+| `physical_design/`   | Final 32-bit ASIC implementation      |
+| `README.md`          | Complete project overview             |
+| `alu.compressed.zip` | Compressed project archive            |
 
 ---
 
-# 21. Documentation Guide
+# 23. Documentation Guide
 
 The repository contains dedicated documentation for the major parts of the project.
 
@@ -754,7 +976,7 @@ Documents the RTL-to-GDSII implementation flow.
 docs/RESULTS.md
 ```
 
-Contains the important synthesis, timing, and physical-design results.
+Contains important synthesis, timing, and physical-design results.
 
 ### Verification
 
@@ -772,94 +994,13 @@ physical_design/ALU4.0_32_FINAL/
 
 Contains the final 32-bit implementation configuration, LEF/SDC files, physical-design reports, and signoff artifacts.
 
----
+### GDSII
 
-# 22. Development Environment
+The final large GDSII artifact is distributed through the GitHub Release:
 
-The project was developed using Windows together with a Linux-based ASIC development environment.
-
-## Windows
-
-The main development machine used Windows, with Linux-based ASIC tools accessed through WSL.
-
-## WSL — Windows Subsystem for Linux
-
-WSL provided the Linux environment required for the open-source ASIC toolchain.
-
-## Ubuntu
-
-Ubuntu running under WSL was used for:
-
-* RTL simulation
-* Yosys synthesis
-* ABC technology mapping
-* LibreLane execution
-* OpenROAD physical design
-* Report analysis
-* Shell scripting
-* File management
-
-## Docker
-
-Docker was used as part of the LibreLane-based ASIC environment to provide a controlled tool environment and manage dependencies.
-
-## EDA Playground
-
-EDA Playground was used during earlier stages for:
-
-* RTL experimentation
-* Verilog/SystemVerilog learning
-* Quick simulations
-* Debugging smaller modules
-
-The project therefore progressed from rapid RTL experimentation to a complete local ASIC-development environment.
-
----
-
-# 23. ASIC Toolchain
-
-### RTL
-
-* SystemVerilog
-* EDA Playground
-
-### Simulation
-
-* Icarus Verilog
-* GTKWave
-
-### Development Environment
-
-* Windows
-* WSL
-* Ubuntu
-* Bash
-* Docker
-
-### Synthesis
-
-* Yosys
-
-### Technology Mapping
-
-* ABC
-
-### Physical Design
-
-* LibreLane
-* OpenROAD
-
-### Process Design Kit
-
-* SKY130A
-
-### Standard-Cell Library
-
-* `sky130_fd_sc_hd`
-
-### Final Output
-
-* GDSII
+```text
+v4.0-32bit
+```
 
 ---
 
@@ -878,12 +1019,26 @@ The project therefore progressed from rapid RTL experimentation to a complete lo
 * 35% placement target density
 * Placement completed
 * CTS completed
-* Routing completed
+* Global routing completed
+* Detailed routing completed
 * Antenna: **PASS**
 * DRC: **PASS**
 * LVS: **PASS**
+* DRC violations: **0**
 * GDSII generated
 * Setup slack: **+4.895714 ns**
+
+### Final signoff summary
+
+```text
+DRC     = PASS
+LVS     = PASS
+Antenna = PASS
+GDSII   = GENERATED
+
+Clock Period = 30 ns
+Setup Slack  = +4.895714 ns
+```
 
 ---
 
@@ -906,33 +1061,107 @@ The project therefore progressed from rapid RTL experimentation to a complete lo
 
 # 25. Engineering Takeaways
 
-### Functional correctness comes first
+## Functional correctness comes first
 
 RTL simulation establishes whether the architecture behaves correctly.
 
-### Synthesis reveals the hardware
+The 64-bit ALU 4.0 implementation achieved:
+
+```text
+328 tests
+328 passed
+0 failed
+```
+
+---
+
+## Synthesis reveals the hardware
 
 RTL that appears simple can produce very different hardware after synthesis.
 
-### Architecture matters
+The earlier generations demonstrated why synthesis results must be analyzed rather than judging a design purely from its RTL appearance.
 
-The choice of arithmetic architecture has a direct effect on area, timing, routing, and physical feasibility.
+---
 
-### Pipelining is an architectural decision
+## Architecture matters
 
-Pipeline stages affect timing, latency, registers, clocking, and physical implementation.
+The choice of arithmetic architecture directly affects:
 
-### Custom arithmetic provides hardware control
+* Area
+* Timing
+* Routing
+* Fanout
+* Capacitance
+* Physical feasibility
 
-Explicit multiplier and divider architectures provide greater visibility into the resulting hardware and avoid generic `$mul`, `$div`, and `$mod` inference in the synthesis result.
+---
 
-### Physical implementation is a separate challenge
+## Pipelining is an architectural decision
+
+Pipeline stages affect:
+
+* Timing
+* Latency
+* Register count
+* Clocking
+* Routing
+* Physical implementation
+
+The 8-stage ALU 4.0 architecture was developed with timing and physical implementation in mind.
+
+---
+
+## Custom arithmetic provides hardware control
+
+Explicit multiplier and divider architectures provide greater visibility into the resulting hardware.
+
+The 64-bit synthesis result contained:
+
+```text
+$mul = 0
+$div = 0
+$mod = 0
+```
+
+This demonstrates that the arithmetic was not left as generic inferred multiplication, division, or modulo operations at that synthesis stage.
+
+---
+
+## Physical implementation is a separate challenge
 
 A design can pass RTL verification and synthesis while still encountering timing or routing problems during physical implementation.
 
-### Scaling exposes hidden constraints
+The 64-bit experiment demonstrated this directly.
 
-The 64-bit experiment demonstrated how routing, clocking, fanout, capacitance, congestion, and timing become increasingly important as the design grows.
+---
+
+## Scaling exposes hidden constraints
+
+The 64-bit experiment showed how:
+
+```text
+Width
+ ↓
+Logic
+ ↓
+Registers
+ ↓
+Routing
+ ↓
+Fanout
+ ↓
+Capacitance
+ ↓
+Clock load
+ ↓
+Congestion
+ ↓
+Timing
+ ↓
+Signoff
+```
+
+becomes increasingly important as the architecture grows.
 
 ---
 
@@ -942,7 +1171,7 @@ The project produced two distinct outcomes.
 
 ## Final Successful ASIC
 
-**ALU 4.0 — 32-bit**
+### ALU 4.0 — 32-bit
 
 The design successfully completed:
 
@@ -954,14 +1183,15 @@ RTL
 → Floorplanning
 → Placement
 → CTS
-→ Routing
+→ Global Routing
+→ Detailed Routing
 → Antenna
 → DRC
 → LVS
 → GDSII
 ```
 
-The final implementation achieved:
+Final results:
 
 ```text
 Setup Slack = +4.895714 ns
@@ -973,7 +1203,7 @@ Antenna = PASS
 GDSII   = GENERATED
 ```
 
-The final GDSII is available through the GitHub Release:
+The final GDSII is distributed through the GitHub Release:
 
 ```text
 v4.0-32bit
@@ -983,7 +1213,7 @@ v4.0-32bit
 
 ## 64-bit Scaling Experiment
 
-**ALU 4.0 — 64-bit**
+### ALU 4.0 — 64-bit
 
 The 64-bit architecture successfully passed:
 
@@ -991,11 +1221,30 @@ The 64-bit architecture successfully passed:
 328 / 328 RTL verification tests
 ```
 
-and completed synthesis and technology mapping.
+and completed:
 
-Its physical-design experiment demonstrated the substantially greater difficulty of achieving timing and routing closure as the architecture scales.
+```text
+Yosys synthesis
+        ↓
+ABC technology mapping
+```
 
-It is therefore documented as a **scaling experiment rather than a final ASIC implementation**.
+The physical-design experiment was then performed to investigate scalability.
+
+The larger design encountered significantly greater timing, routing, fanout, capacitance, and physical-design challenges.
+
+Therefore:
+
+```text
+64-bit RTL              = SUCCESS
+64-bit Verification     = 328/328 PASS
+64-bit Synthesis        = SUCCESS
+64-bit ABC Mapping      = SUCCESS
+64-bit Physical Closure = NOT COMPLETED
+64-bit GDSII             = NOT CLAIMED
+```
+
+The 64-bit implementation is intentionally documented as a **scaling experiment**, not as a completed ASIC.
 
 ---
 
@@ -1031,6 +1280,40 @@ and finally to:
 
 **a successful 32-bit GDSII implementation.**
 
-The subsequent 64-bit experiment demonstrated that ASIC design does not scale linearly with RTL width. Functional correctness is only one part of the problem; timing, routing, clocking, capacitance, congestion, and signoff ultimately determine whether a design can become a physically realizable implementation.
+The subsequent 64-bit experiment demonstrated that ASIC design does not scale linearly with RTL width.
+
+Functional correctness is only one part of the problem. Timing, routing, clocking, capacitance, congestion, fanout, and signoff ultimately determine whether a design can become a physically realizable implementation.
+
+The project therefore represents not only a working ALU, but an iterative study of how **RTL architecture translates into real ASIC hardware**.
+
+---
+
+## Final Status
+
+```text
+┌───────────────────────────────────────────────┐
+│              ALU 4.0 PROJECT                  │
+├───────────────────────────────────────────────┤
+│                                               │
+│  RTL Design                 ✓                 │
+│  Functional Verification   ✓                 │
+│  Synthesis                 ✓                 │
+│  Technology Mapping        ✓                 │
+│  32-bit Physical Design   ✓                 │
+│  32-bit DRC               ✓ PASS             │
+│  32-bit LVS               ✓ PASS             │
+│  32-bit Antenna           ✓ PASS             │
+│  32-bit GDSII             ✓ GENERATED        │
+│                                               │
+│  64-bit RTL                ✓                 │
+│  64-bit Verification      ✓ 328/328         │
+│  64-bit Synthesis         ✓                 │
+│  64-bit Mapping           ✓                 │
+│  64-bit Physical Closure  — Experiment      │
+│                                               │
+└───────────────────────────────────────────────┘
+```
 
 **Designed. Verified. Synthesized. Physically Implemented.**
+
+**From RTL to GDSII.**
