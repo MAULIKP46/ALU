@@ -1,0 +1,10 @@
+read_verilog -sv design.sv
+hierarchy -top ALU
+proc
+opt
+techmap
+opt
+abc
+opt
+stat
+write_verilog alu_mapped.v
