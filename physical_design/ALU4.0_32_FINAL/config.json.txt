@@ -1,0 +1,11 @@
+{
+    "DESIGN_NAME": "ALU",
+    "VERILOG_FILES": ["dir::design.sv"],
+    "CLOCK_PORT": "clk",
+    "CLOCK_PERIOD": 30,
+    "PDK": "sky130A",
+    "STD_CELL_LIBRARY": "sky130_fd_sc_hd",
+    "FP_CORE_UTIL": 25,
+    "PL_TARGET_DENSITY_PCT": 35,
+    "GRT_ADJUSTMENT": 0.2
+}
